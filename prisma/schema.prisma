@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  authTokens AuthToken[]
+  receipts   Receipt[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model AuthToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  token     String   @unique @db.VarChar(500)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([expiresAt])
+  @@map("auth_tokens")
+}
+
+model Receipt {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  filename   String   @db.VarChar(255)
+  filePath   String   @map("file_path") @db.VarChar(500)
+  mimeType   String   @map("mime_type") @db.VarChar(50)
+  fileSize   Int      @map("file_size")
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analyses ReceiptAnalysis[]
+
+  @@index([userId])
+  @@map("receipts")
+}
+
+model ReceiptAnalysis {
+  id             Int       @id @default(autoincrement())
+  receiptId      Int       @map("receipt_id")
+  name           String?   @db.VarChar(255)
+  merchant       String?   @db.VarChar(255)
+  description    String?   @db.Text
+  type           String?   @db.VarChar(50)
+  issuedAt       DateTime? @map("issued_at")
+  category       String?   @db.VarChar(100)
+  location       String?   @db.VarChar(255)
+  note           String?   @db.Text
+  contact        String?   @db.VarChar(255)
+  transactions   Json?
+  tax            Decimal?  @db.Decimal(10, 2)
+  vat            Decimal?  @db.Decimal(10, 2)
+  otherCharges   Decimal?  @map("other_charges") @db.Decimal(10, 2)
+  total          Decimal?  @db.Decimal(10, 2)
+  rawLlmResponse Json?     @map("raw_llm_response")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  receipt Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+
+  @@index([receiptId])
+  @@map("receipt_analyses")
+}
