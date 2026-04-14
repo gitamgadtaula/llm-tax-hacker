@@ -100,6 +100,12 @@ class OpenAIProvider implements LLMProvider {
         issued_at: result.issued_at || new Date().toISOString().split("T")[0],
         type: result.type || "other",
         transactions: result.transactions || [],
+        tokenUsage: {
+          promptTokens: response.usage?.prompt_tokens || 0,
+          completionTokens: response.usage?.completion_tokens || 0,
+          totalTokens: response.usage?.total_tokens || 0,
+          model: config.OPENAI_MODEL,
+        },
       };
     } catch (error) {
       console.error("OpenAI API error:", error);
