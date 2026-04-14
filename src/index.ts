@@ -22,7 +22,7 @@ const openApiDoc = {
   },
   servers: [
     {
-      url: "http://localhost:3000",
+      url: process.env.APP_URL || "http://localhost:3000",
       description: "Development server",
     },
   ],
