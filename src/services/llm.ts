@@ -29,6 +29,7 @@ class OpenAIProvider implements LLMProvider {
     - Individual transaction items with names and amounts
     - Tax amount if applicable
     - VAT amount if applicable
+    - Refund amount if applicable
     - Other charges if applicable
     - Total amount
     
@@ -46,11 +47,12 @@ class OpenAIProvider implements LLMProvider {
       "transactions": [{"name": "string", "amount": number}],
       "tax": number or null,
       "vat": number or null,
+      "refund": number or null,
       "other_charges": number or null,
       "total": number
     }
     
-    Important: Calculate the total programmatically from all transaction amounts, taxes, and charges.
+    Important: Calculate the total programmatically from all transaction amounts, taxes, and charges, subtracting any refunds.
     Ensure all numeric values are numbers, not strings. If a field is not found, use null.`;
 
     try {
@@ -91,7 +93,8 @@ class OpenAIProvider implements LLMProvider {
       const calculatedTotal =
         transactionTotal +
         (result.tax || 0) +
-        (result.vat || 0) +
+        (result.vat || 0) -
+        (result.refund || 0) +
         (result.other_charges || 0);
 
       return {

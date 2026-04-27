@@ -1,3 +1,14 @@
+## Run in prod using pm2
+```
+pm2 start npm --name tax-llm-dev -- run dev
+pm2 restart tax-llm-dev
+pm2 save
+pm2 startup
+```
+
+
+
+
 # Tax LLM API
 
 A REST API for analyzing receipts using Large Language Models (LLMs). Upload receipt images and get structured transaction data extracted using AI.
